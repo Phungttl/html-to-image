@@ -108,11 +108,11 @@
     
     .resize-handle {
       position: absolute;
-      width: 20px;
-      height: 20px;
-      right: -2px; bottom: -2px;
+      width: 30px;
+      height: 30px;
+      right: -5px; bottom: -5px;
       background: #007bff;
-      border-radius: 0 0 6px 0;
+      border-radius: 0 0 8px 0;
       cursor: se-resize;
       z-index: 11;
       display: flex;
@@ -121,16 +121,17 @@
       pointer-events: auto;
       -webkit-touch-callout: none;
       -webkit-user-select: none;
+      touch-action: manipulation;
     }
     
     .resize-handle:after {
       content: '';
       display: block;
-      width: 12px;
-      height: 12px;
-      border-right: 2px solid #fff;
-      border-bottom: 2px solid #fff;
-      margin: 2px;
+      width: 16px;
+      height: 16px;
+      border-right: 3px solid #fff;
+      border-bottom: 3px solid #fff;
+      margin: 4px;
       box-sizing: border-box;
     }
     
@@ -191,6 +192,17 @@
       .camera-btn svg { 
         width: 28px; 
         height: 28px; 
+      }
+      .resize-handle {
+        width: 36px;
+        height: 36px;
+        right: -6px;
+        bottom: -6px;
+      }
+      .resize-handle:after {
+        width: 20px;
+        height: 20px;
+        margin: 5px;
       }
       h2 {
         font-size: 1rem;
@@ -293,6 +305,8 @@
 
     selectBox.addEventListener('pointerdown', function(e) {
       if (e.target === resizeHandle) return;
+      e.preventDefault();
+      e.stopPropagation();
       isDragging = true;
       selectBox.classList.add('active');
       const pos = getTouchPos(e);
@@ -303,6 +317,8 @@
     
     document.addEventListener('pointermove', function(e) {
       if (isDragging) {
+        e.preventDefault();
+        e.stopPropagation();
         let parent = selectBox.parentElement;
         const pos = getTouchPos(e);
         let x = pos.x - dragOffsetX;
@@ -313,6 +329,8 @@
         selectBox.style.top = y + 'px';
       }
       if (isResizing) {
+        e.preventDefault();
+        e.stopPropagation();
         let parent = selectBox.parentElement;
         const pos = getTouchPos(e);
         let newW = Math.max(60, Math.min(resizeStartW + (pos.x - resizeStartX), parent.offsetWidth - selectBox.offsetLeft));
@@ -330,6 +348,7 @@
     });
     
     resizeHandle.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
       e.stopPropagation();
       isResizing = true;
       selectBox.classList.add('active');
@@ -465,7 +484,20 @@
           if (success) {
             showNotification('✅ Ảnh đã được copy vào clipboard!', 'success');
           } else {
-            showNotification('❌ Không thể copy ảnh vào clipboard (iOS Safari)', 'error');
+            // Thử fallback khác cho iOS Safari
+            try {
+              // Tạo link download thay thế
+              const downloadLink = document.createElement('a');
+              downloadLink.href = img.src;
+              downloadLink.download = 'captured-image.png';
+              downloadLink.style.display = 'none';
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+              showNotification('📱 Ảnh đã được tạo! Vui lòng bấm nút Copy để copy thủ công.', 'info');
+            } catch (e) {
+              showNotification('❌ Không thể copy ảnh vào clipboard (iOS Safari)', 'error');
+            }
           }
         }, 200);
       }).catch(error => {
@@ -499,6 +531,9 @@
       if (type === 'success') {
         notification.style.background = '#28a745';
         notification.style.color = '#fff';
+      } else if (type === 'info') {
+        notification.style.background = '#17a2b8';
+        notification.style.color = '#fff';
       } else {
         notification.style.background = '#dc3545';
         notification.style.color = '#fff';
@@ -506,7 +541,7 @@
       
       document.body.appendChild(notification);
       
-      // Tự động ẩn sau 3 giây
+      // Tự động ẩn sau 4 giây
       setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transform = 'translateX(100%)';
@@ -515,7 +550,7 @@
             document.body.removeChild(notification);
           }
         }, 300);
-      }, 3000);
+      }, 4000);
     }
   </script>
 </body>
