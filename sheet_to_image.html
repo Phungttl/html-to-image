@@ -65,6 +65,10 @@
       padding: 0;
       width: 100%;
       -webkit-overflow-scrolling: touch;
+      /* Sửa lỗi bảng bị bóp chiều ngang trên mobile */
+      overflow-x: auto;
+      width: 100vw;
+      max-width: 100vw;
     }
     
     .paste-area {
@@ -86,8 +90,19 @@
       -ms-user-select: text;
       user-select: text;
       line-height: 1.4;
+      /* Sửa lỗi bảng bị bóp chiều ngang trên mobile */
+      overflow-x: auto;
+      min-width: min-content;
+      width: auto;
+      max-width: 100vw;
+      display: block;
     }
     
+    .paste-area table {
+      width: auto !important;
+      min-width: min-content !important;
+    }
+
     .select-box {
       position: absolute;
       top: 30px; left: 30px;
@@ -218,6 +233,18 @@
       .paste-area {
         font-size: 0.95rem;
         padding: 8px;
+      }
+      /* Tăng vùng chạm resize handle trên mobile */
+      .resize-handle {
+        width: 44px;
+        height: 44px;
+        right: -10px;
+        bottom: -10px;
+      }
+      .resize-handle:after {
+        width: 28px;
+        height: 28px;
+        margin: 8px;
       }
     }
     
@@ -560,6 +587,16 @@
         }, 300);
       }, 4000);
     }
+
+    // Thêm hướng dẫn copy ảnh thủ công cho iOS
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+      if (isIOS()) {
+        showNotification('📱 Trên iPhone/iPad, hãy nhấn giữ vào ảnh và chọn "Copy" để sao chép.', 'info');
+      }
+    });
   </script>
 </body>
-</html> 
+</html>
